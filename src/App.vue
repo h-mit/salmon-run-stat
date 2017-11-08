@@ -1,16 +1,50 @@
 <template lang="pug">
 #app
-  img(src="./assets/logo.png")
-  HelloWorld
+  .container
+    ResultForm(@addItem="addItem")
+    ResultStat(:results="results")
+  ResultList(:results="results" @deleteItem="deleteItem")
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
+import _ from 'lodash'
+import storage from './storage'
+import ResultForm from './components/ResultForm'
+import ResultStat from './components/ResultStat'
+import ResultList from './components/ResultList'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    ResultForm,
+    ResultStat,
+    ResultList
+  },
+  data() {
+    return {
+      results: storage.fetch()
+    }
+  },
+  watch: {
+    results: {
+      handler(results) {
+        storage.save(results)
+      },
+      deep: true
+    }
+  },
+  methods: {
+    addItem(result) {
+      this.results.push(result)
+    },
+    deleteItem(timestamp) {
+      let index = _.findIndex(this.results, item => {
+        return item.timestamp === timestamp
+      })
+      if (index >= 0) {
+        this.results.splice(index, 1)
+      }
+    }
   }
 }
 </script>
@@ -21,7 +55,20 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: $text-color;
-  margin-top: 60px;
+  width: $content-width;
+  margin: 30px auto;
+
+  > .container {
+    display: flex;
+  }
+  > .container > .result-form,
+  > .container > .result-stat {
+    flex: 1;
+    padding: $content-padding;
+  }
+
+  > .result-list {
+    padding: $content-padding;
+  }
 }
 </style>
